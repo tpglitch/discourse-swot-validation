@@ -1,0 +1,7 @@
+plugins:
+  swot_validation_enabled:
+    default: true
+    client: true
+    type: bool
+    title: "Enable SWOT Email Validation"
+    description: "Check if the email address used during sign-up belongs to an academic institution using the SWOT gem."
