@@ -1,40 +1,34 @@
-# name: discourse-swot-validation
-# about: Validates email sign-ups against the swot gem to check for academic email addresses
-# version: 0.2
-# authors: Tyler Kinney
-# url: https://github.com/tpglitch/discourse-swot-validation
+# name: discourse-email-validation
+# about: Validates email sign-ups using the swot gem to check for academic emails
+# version: 0.1
+# authors: Your Name
+# url: https://github.com/yourusername/discourse-email-validation
 
-enabled_site_setting :swot_validation_enabled
-
-gem 'swot', github: 'jetbrains/swot'
+enabled_site_setting :email_validation_enabled
 
 after_initialize do
-  module ::SwotValidation
-    class Engine < ::Rails::Engine
-      engine_name 'swot_validation'
-      isolate_namespace SwotValidation
-    end
-  end
+  require 'swot'
 
-  # Extend the existing UserValidator with swot validation
-  require_dependency 'user_validator'
-
-  class ::UserValidator
-    def validate_email(email)
-      super(email)
-      if SiteSetting.swot_validation_enabled && Swot::is_academic?(email)
-        # If the email is academic, we continue with the sign-up process
-        return
-      elsif SiteSetting.swot_validation_enabled
-        # If the email is not academic and validation is enabled, add an error
-        @errors.add(:email, I18n.t('user.email_is_not_academic'))
+  # Custom email validation during sign-up
+  module ::EmailValidation
+    class EmailValidator
+      def self.validate(email)
+        Swot::is_academic?(email)
       end
     end
   end
+
+  # Adding custom validation to the User Validator
+  add_to_class(:user_validator, :validate_email_with_swot) do
+    return unless SiteSetting.email_validation_enabled
+
+    unless ::EmailValidation::EmailValidator.validate(@email)
+      @errors.add(:email, I18n.t("email_validation.errors.invalid_email"))
+    end
+  end
+
+  # Adding custom validation method to the existing email validation process
+  register_user_validator do
+    validate_email_with_swot
+  end
 end
-
-# Add translations
-register_locale_file "config/locales/server.en.yml", :en
-
-# Configuration Settings
-enabled_site_setting :swot_validation_enabled

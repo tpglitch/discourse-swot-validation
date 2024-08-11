@@ -1,3 +1,4 @@
 en:
-  user:
-    email_is_not_academic: "Oops! Please use your school-provided email."
+  email_validation:
+    errors:
+      invalid_email: "The email address you sign-up with MUST be a school-email."
