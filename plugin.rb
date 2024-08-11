@@ -1,7 +1,7 @@
 # name: discourse-swot-validation
 # about: Validates email sign-ups against the swot gem to check for academic email addresses
-# version: 0.1
-# authors: Your Name
+# version: 0.2
+# authors: Tyler Kinney
 # url: https://github.com/tpglitch/discourse-swot-validation
 
 enabled_site_setting :swot_validation_enabled
