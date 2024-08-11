@@ -6,8 +6,10 @@
 
 enabled_site_setting :email_validation_enabled
 
+gem 'swot', github: 'leereilly/swot'
+
 after_initialize do
-  require 'swot'
+  #require 'swot' #Firepup fix this!
 
   # Custom email validation during sign-up
   module ::EmailValidation
