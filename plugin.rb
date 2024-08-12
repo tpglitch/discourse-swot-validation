@@ -4,6 +4,8 @@
 # authors: Tyler Kinney
 # url: https://github.com/tpglitch/discourse-swot-validation
 
+gem 'swot', '1.0.0'
+
 enabled_site_setting :email_validation_enabled
 
 after_initialize do
