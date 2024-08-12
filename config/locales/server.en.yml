@@ -1,4 +1,4 @@
 en:
   email_validation:
     errors:
-      invalid_email: "The email address you sign-up with MUST be a school-email."
+      not_academic: "The email address you sign-up with MUST be a school-email."

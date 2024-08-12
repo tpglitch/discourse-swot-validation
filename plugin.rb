@@ -1,38 +1,30 @@
-# name: discourse-swot-validation
-# about: Validates email sign-ups using the swot gem to check for academic emails
-# version: 1.0.0
-# authors: Tyler Kinney
-# url: https://github.com/tpglitch/discourse-swot-validation
+# frozen_string_literal: true
 
-gem 'swot', '1.0.0'
-
-enabled_site_setting :email_validation_enabled
-
-gem 'swot', github: 'leereilly/swot'
+enabled_site_setting :email_validator_enabled
 
 after_initialize do
-  #require 'swot' #Firepup fix this!
-
-  # Custom email validation during sign-up
-  module ::EmailValidation
-    class EmailValidator
-      def self.validate(email)
-        Swot::is_academic?(email)
-      end
+  module ::EmailValidator
+    class Engine < ::Rails::Engine
+      engine_name "email_validator"
+      isolate_namespace EmailValidator
     end
   end
 
-  # Adding custom validation to the User Validator
-  add_to_class(:user_validator, :validate_email_with_swot) do
-    return unless SiteSetting.email_validation_enabled
+  require_dependency 'email_validator/email_checker'
 
-    unless ::EmailValidation::EmailValidator.validate(@email)
-      @errors.add(:email, I18n.t("email_validation.errors.invalid_email"))
+  class ::Users::EmailValidator
+    def self.can_signup?(email)
+      response = EmailValidator::EmailChecker.is_academic?(email)
+      response["isAcademic"]
+    rescue => e
+      Rails.logger.error("Email validation failed: #{e.message}")
+      false
     end
   end
 
-  # Adding custom validation method to the existing email validation process
-  register_user_validator do
-    validate_email_with_swot
+  DiscourseEvent.on(:before_validate_user) do |user|
+    unless Users::EmailValidator.can_signup?(user.email)
+      user.errors.add(:email, I18n.t("email_validator.not_academic"))
+    end
   end
 end
